@@ -5,3 +5,4 @@ hexor
 .vscode/**
 *.o
 *.gch
+*.txt
