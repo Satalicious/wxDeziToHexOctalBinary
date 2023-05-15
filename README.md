@@ -26,8 +26,9 @@ your program. The program must build without errors in Linux. (10 points)
 Edit this [README](README.md) with instructions on how to compile your program.
 (5 points)
 
-Provide a `LICENSE` file that correctly contains any open source license and
-your name. (10 points)
 
 Push your work to make it available for grading. (10 points)
 
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.

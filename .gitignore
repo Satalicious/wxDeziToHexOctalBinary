@@ -1,14 +1,7 @@
-# everything inside the build directory
-^build/
-
-# backup files
-*~
-
-*.ii
-*.s
+ttop.kdev4
+.kdev4
+hexor
+.vscode/
+.vscode/**
 *.o
-*.out
-*-swp
-
-.directory
-
+*.gch
