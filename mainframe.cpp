@@ -7,8 +7,7 @@
 
 #include <vector>
 #include <fstream> 
-#include <chrono>
-#include <ctime>
+#include <filesystem>
 
 std::string to_hex(std::string s )
 {
@@ -22,39 +21,43 @@ std::string to_hex(std::string s )
   return oss.str();
 }
 
-int writeOnfile (char* filetext) {
-   std::ofstream myfile;
-   myfile.open ("data.txt", std::fstream::app);
-   myfile << filetext;
-   myfile.close();
-   return 0;
-}
-
-
-int MainFrame::LoadFromFile() {
-  //TODO:
-  std::ofstream myfile;
-  myfile.open ("data.txt", std::fstream::app);
-  
-  return 0;
-}
-
-
 void MainFrame::OnAsciiKeyDown(wxKeyEvent& key) {
-  //The 1 specifies the length of the string to create, and the char being passed in is what to fill that string with. 
-  //So it's creating a new string of length 1, filled with the char that was created from the Unicode key.
-  std::string keyStr(1, static_cast<char>(key.GetUnicodeKey()));
+  if (key.GetUnicodeKey() == 8) { // Handling backspace
+    wxString asciiStr = asciiInput->GetValue();
+    if(!asciiStr.IsEmpty()) {
+      asciiStr.RemoveLast();
+      asciiInput->SetValue(asciiStr); 
 
-  // Append the Unicode character to the ASCII input field
-  asciiInput->AppendText(keyStr);
-
-  // Convert the Unicode character to hexadecimal and append it to the hex input field
-  hexInput->AppendText(to_hex(keyStr));
+      wxString hexStr = hexInput->GetValue();
+      if(!hexStr.IsEmpty()) { 
+        hexStr.RemoveLast(2); 
+        hexInput->SetValue(hexStr);
+      }
+    }
+  } else { // For all other keys
+    std::string keyStr(1, static_cast<char>(key.GetUnicodeKey()));
+    asciiInput->AppendText(keyStr);
+    hexInput->AppendText(to_hex(keyStr));
+  }
 }
 
-void MainFrame::OnClearButton(wxCommandEvent& event) {
-  asciiInput->Clear();
-  hexInput->Clear();
+
+int MainFrame::WriteInFile(std::string str, bool append) {
+  std::ofstream myfile;
+  if(append) {
+    myfile.open("data.txt", std::ofstream::out | std::ofstream::app);
+  } else {
+    myfile.open("data.txt", std::ofstream::out);
+  }
+
+  if(myfile.is_open()){
+      myfile << str << std::endl;
+      myfile.close();
+  } else {
+      std::cerr << "Unable to open file" << std::endl;
+      return -1;
+  }
+  return 0;
 }
 
 void MainFrame::OnSaveButton(wxCommandEvent& event) {
@@ -62,25 +65,51 @@ void MainFrame::OnSaveButton(wxCommandEvent& event) {
     std::string asciiText = asciiInput->GetValue().ToStdString();
     std::vector<std::string> asciiT;
     asciiT.push_back(asciiText);
-    // write ascii
-    for(auto& e : asciiT) {WriteInFile(e);}
-    // write hex
-    for(auto& e : asciiT) {WriteInFile(to_hex(e));}
+    
+    // erase data and write ascii
+    for(auto& e : asciiT) {WriteInFile(e, false);}
+    
+    // append hex
+    for(auto& e : asciiT) {WriteInFile(to_hex(e), true);}
   }
-
 }
+
+
+
+void MainFrame::OnClearButton(wxCommandEvent& event) {
+  asciiInput->Clear();
+  hexInput->Clear();
+}
+
 
 void MainFrame::OnLoadButton(wxCommandEvent& event) {
-  //TODO:
-  LoadFromFile();
+  std::ifstream myfile;
+  std::string str, ascii, hex;
+  myfile.open("data.txt");
+  if(myfile.is_open()){
+    while(std::getline(myfile, str)) {
+      if(ascii == "") {
+        ascii = str;
+      } else {
+        hex = str; 
+      }
+    }
+    myfile.close();
+
+    // Assuming the ASCII string is on the first line and the hex string is on the second line
+    asciiInput->SetValue(ascii);
+    hexInput->SetValue(hex);
+  } else {
+    std::cerr << "Unable to open file" << std::endl;
+  }
 }
+
 
 MainFrame::MainFrame(const wxString &title)
     : wxFrame(nullptr, wxID_ANY, title, wxDefaultPosition, wxDefaultSize,
               wxDEFAULT_FRAME_STYLE & ~wxRESIZE_BORDER) {
   
   panel = new wxPanel(this);
-
   asciiInput = new wxTextCtrl(panel, wxID_ANY, "", wxPoint(0, 0), wxSize(1000,500));
   asciiInput->Bind(wxEVT_CHAR, &MainFrame::OnAsciiKeyDown, this);
   hexInput = new wxTextCtrl(panel, wxID_ANY, "", wxPoint(0, 500), wxSize(1000,500));

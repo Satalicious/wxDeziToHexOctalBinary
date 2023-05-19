@@ -16,13 +16,12 @@ private:
   wxButton* saveButton;
   wxButton* loadButton;
   
-
   void OnAsciiKeyDown(wxKeyEvent& key);
+  void OnHexKeyDown(wxKeyEvent& key);
   void OnClearButton(wxCommandEvent &event);
   void OnSaveButton(wxCommandEvent &event);
   void OnLoadButton(wxCommandEvent &event);
-  int WriteInFile(std::string text);
-  int LoadFromFile();
+  int WriteInFile(std::string str, bool append);
   
 };
 
