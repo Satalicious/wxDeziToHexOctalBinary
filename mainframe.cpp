@@ -22,25 +22,59 @@ std::string to_hex(std::string s )
 }
 
 void MainFrame::OnAsciiKeyDown(wxKeyEvent& key) {
-  if (key.GetUnicodeKey() == 8) { // Handling backspace
+  if (key.GetUnicodeKey() == 8) {
     wxString asciiStr = asciiInput->GetValue();
     if(!asciiStr.IsEmpty()) {
       asciiStr.RemoveLast();
-      asciiInput->SetValue(asciiStr); 
+      asciiInput->SetValue(asciiStr);
 
-      wxString hexStr = hexInput->GetValue();
-      if(!hexStr.IsEmpty()) { 
-        hexStr.RemoveLast(2); 
-        hexInput->SetValue(hexStr);
-      }
+      // reconvert entire ASCII to HEX
+      hexInput->SetValue(to_hex(asciiStr.ToStdString()));
     }
   } else { // For all other keys
     std::string keyStr(1, static_cast<char>(key.GetUnicodeKey()));
     asciiInput->AppendText(keyStr);
-    hexInput->AppendText(to_hex(keyStr));
+    hexInput->SetValue(to_hex(asciiInput->GetValue().ToStdString()));
   }
 }
 
+std::string hex_to_ascii(std::string hex) {
+    std::string ascii = "";
+    for (size_t i = 0; i < hex.length(); i += 2) {
+        std::string byte = hex.substr(i, 2);
+        char chr = static_cast<char>(stoi(byte, nullptr, 16));
+        // Check if character is printable
+        if ((chr >= 32 && chr <= 126) || (chr >= 161 && chr <= 255)) {
+            ascii += chr;
+        } else {
+            ascii += '.'; // Append '.' for non-printable characters
+        }
+    }
+    return ascii;
+}
+
+void MainFrame::OnHexKeyDown(wxKeyEvent& key) {
+  int keyCode = key.GetUnicodeKey();
+  if ((keyCode >= '0' && keyCode <= '9') || 
+      (keyCode >= 'a' && keyCode <= 'f') || 
+      (keyCode >= 'A' && keyCode <= 'F')) { 
+    // Only allow hexadecimal characters
+    std::string keyStr(1, static_cast<char>(key.GetUnicodeKey()));
+    hexInput->AppendText(keyStr);
+
+    // reconvert entire HEX to ASCII
+    asciiInput->SetValue(hex_to_ascii(hexInput->GetValue().ToStdString()));
+  } else if (key.GetUnicodeKey() == 8) {
+    wxString hexStr = hexInput->GetValue();
+    if(!hexStr.IsEmpty()) {
+      hexStr.RemoveLast();
+      hexInput->SetValue(hexStr);
+
+      // reconvert entire HEX to ASCII
+      asciiInput->SetValue(hex_to_ascii(hexStr.ToStdString()));
+    }
+  }
+}
 
 int MainFrame::WriteInFile(std::string str, bool append) {
   std::ofstream myfile;
@@ -74,13 +108,10 @@ void MainFrame::OnSaveButton(wxCommandEvent& event) {
   }
 }
 
-
-
 void MainFrame::OnClearButton(wxCommandEvent& event) {
   asciiInput->Clear();
   hexInput->Clear();
 }
-
 
 void MainFrame::OnLoadButton(wxCommandEvent& event) {
   std::ifstream myfile;
@@ -113,7 +144,7 @@ MainFrame::MainFrame(const wxString &title)
   asciiInput = new wxTextCtrl(panel, wxID_ANY, "", wxPoint(0, 0), wxSize(1000,500));
   asciiInput->Bind(wxEVT_CHAR, &MainFrame::OnAsciiKeyDown, this);
   hexInput = new wxTextCtrl(panel, wxID_ANY, "", wxPoint(0, 500), wxSize(1000,500));
-  hexInput->Bind(wxEVT_CHAR, &MainFrame::OnAsciiKeyDown, this);
+  hexInput->Bind(wxEVT_CHAR, &MainFrame::OnHexKeyDown, this);
   clearButton = new wxButton(panel, wxID_ANY, "CLEAR", wxPoint(0, 1000), wxSize(300, 200));
   clearButton->Bind(wxEVT_BUTTON, &MainFrame::OnClearButton, this);
   saveButton = new wxButton(panel, wxID_ANY, "SAVE", wxPoint(350, 1000), wxSize(300,200));
@@ -121,4 +152,3 @@ MainFrame::MainFrame(const wxString &title)
   loadButton = new wxButton(panel, wxID_ANY, "LOAD", wxPoint(700, 1000), wxSize(300,200));
   loadButton->Bind(wxEVT_BUTTON, &MainFrame::OnLoadButton, this);
 }
-
