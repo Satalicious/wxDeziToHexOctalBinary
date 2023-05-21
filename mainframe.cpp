@@ -94,45 +94,23 @@ int MainFrame::WriteInFile(std::string str, bool append) {
   return 0;
 }
 
-void MainFrame::OnSaveButton(wxCommandEvent& event) {
-  if(asciiInput->GetValue().ToStdString() != "") {
-    std::string asciiText = asciiInput->GetValue().ToStdString();
-    std::vector<std::string> asciiT;
-    asciiT.push_back(asciiText);
-    
-    // erase data and write ascii
-    for(auto& e : asciiT) {WriteInFile(e, false);}
-    
-    // append hex
-    for(auto& e : asciiT) {WriteInFile(to_hex(e), true);}
-  }
-}
-
 void MainFrame::OnClearButton(wxCommandEvent& event) {
   asciiInput->Clear();
   hexInput->Clear();
 }
 
-void MainFrame::OnLoadButton(wxCommandEvent& event) {
-  std::ifstream myfile;
-  std::string str, ascii, hex;
-  myfile.open("data.txt");
-  if(myfile.is_open()){
-    while(std::getline(myfile, str)) {
-      if(ascii == "") {
-        ascii = str;
-      } else {
-        hex = str; 
-      }
-    }
-    myfile.close();
+void MainFrame::OnSaveButton(wxCommandEvent& event) {
+  SaveSession();
+}
 
-    // Assuming the ASCII string is on the first line and the hex string is on the second line
-    asciiInput->SetValue(ascii);
-    hexInput->SetValue(hex);
-  } else {
-    std::cerr << "Unable to open file" << std::endl;
-  }
+void MainFrame::OnLoadButton(wxCommandEvent& event) {
+  LoadSession();
+}
+
+void MainFrame::OnClose(wxCloseEvent& event) {
+    // Save session before closing
+    SaveSession();
+    event.Skip(); // make sure the default handler still gets called. We don't want to eat the event.
 }
 
 
@@ -151,4 +129,40 @@ MainFrame::MainFrame(const wxString &title)
   saveButton->Bind(wxEVT_BUTTON, &MainFrame::OnSaveButton, this);
   loadButton = new wxButton(panel, wxID_ANY, "LOAD", wxPoint(700, 1000), wxSize(300,200));
   loadButton->Bind(wxEVT_BUTTON, &MainFrame::OnLoadButton, this);
+
+  LoadSession();
+}
+
+MainFrame::~MainFrame() {
+    // Save session before closing
+    SaveSession();
+}
+
+void MainFrame::SaveSession() {
+    if(asciiInput->GetValue().ToStdString() != "") {
+        std::string asciiText = asciiInput->GetValue().ToStdString();
+        std::string hexText = hexInput->GetValue().ToStdString();
+
+        WriteInFile(asciiText, false);
+        WriteInFile(hexText, true);
+    }
+}
+
+void MainFrame::LoadSession() {
+    std::ifstream myfile;
+    std::string str, ascii, hex;
+    myfile.open("data.txt");
+    if(myfile.is_open()){
+        while(std::getline(myfile, str)) {
+            if(ascii == "") {
+                ascii = str;
+            } else {
+                hex = str; 
+            }
+        }
+        myfile.close();
+
+        asciiInput->SetValue(ascii);
+        hexInput->SetValue(hex);
+    }
 }

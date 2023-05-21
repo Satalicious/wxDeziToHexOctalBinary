@@ -7,6 +7,7 @@
 class MainFrame : public wxFrame {
 public:
   MainFrame(const wxString &title);
+  virtual ~MainFrame();
 
 private:
   wxPanel *panel;
@@ -22,6 +23,10 @@ private:
   void OnSaveButton(wxCommandEvent &event);
   void OnLoadButton(wxCommandEvent &event);
   int WriteInFile(std::string str, bool append);
+  void SaveSession();
+  void LoadSession();
+  void OnClose(wxCloseEvent& event);
+
   
 };
 
