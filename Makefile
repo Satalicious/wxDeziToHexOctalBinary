@@ -2,7 +2,7 @@ WX_CONFIG := wx-config
 WX_CXXFLAGS := $(shell $(WX_CONFIG) --cxxflags)
 WX_LIBS := $(shell $(WX_CONFIG) --libs)
 
-APPLICATION := hexor
+APPLICATION := name
 OBJECTS := mainframe.o app.o
 
 LIBS += `wx-config --libs net`
