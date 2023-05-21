@@ -166,3 +166,36 @@ void MainFrame::LoadSession() {
         hexInput->SetValue(hex);
     }
 }
+
+
+/* #include <string>
+#include <iostream>
+
+class Animal {
+protected:
+    std::string name;
+public:
+    void setName(std::string name) {this->name = name;}
+    virtual void makeSound() = 0;
+};
+
+class Dog : public Animal { // Inheritance
+public:
+    void makeSound() override { 
+        std::cout << name << " says Woof!" << std::endl; 
+    }
+};
+
+int main() {
+    Dog dog;
+    dog.setName("Rex");
+    dog.makeSound(); 
+    return 0;
+} 
+
+    We created a base class Animal with the protected data member name and the public setter method setName(), showing Encapsulation. The makeSound() method is declared but not defined, expecting derived classes to provide the definition.
+    The Dog class inherit from Animal and provides their own implementation for makeSound(), showing Polymorphism.
+    Instances of Dog are treated as Animal and behave according to their types when makeSound() is called, demonstrating both Inheritance and Polymorphism.
+*/
+
+
