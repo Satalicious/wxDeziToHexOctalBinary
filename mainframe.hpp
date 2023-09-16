@@ -7,25 +7,27 @@
 class MainFrame : public wxFrame {
 public:
   MainFrame(const wxString &title);
-  virtual ~MainFrame();
+  ~MainFrame() {}
 
 private:
   wxPanel *panel;
-  wxTextCtrl* asciiInput;
   wxTextCtrl* hexInput;
+  wxTextCtrl* octalInput;
+  wxTextCtrl* binaryInput;
+  wxTextCtrl* decimalInput;
+
   wxButton* clearButton;
   wxButton* saveButton;
   wxButton* loadButton;
   
-  void OnAsciiKeyDown(wxKeyEvent& key);
-  void OnHexKeyDown(wxKeyEvent& key);
+
   void OnClearButton(wxCommandEvent &event);
-  void OnSaveButton(wxCommandEvent &event);
-  void OnLoadButton(wxCommandEvent &event);
-  int WriteInFile(std::string str, bool append);
-  void SaveSession();
-  void LoadSession();
+  
+
+
   void OnClose(wxCloseEvent& event);
+
+  void OnDecimalKeyDown(wxCommandEvent& event);
 
   
 };
